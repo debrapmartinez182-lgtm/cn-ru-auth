@@ -7,7 +7,7 @@ import { allDocuments, type DocumentType } from "@/data/services";
 type OrderStep = 1 | 2 | 3;
 
 interface OrderForm {
-  docId: string;
+  docIds: string[];
   name: string;
   phone: string;
   email: string;
@@ -24,7 +24,7 @@ export default function OrderPage() {
   const [step, setStep] = useState<OrderStep>(1);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [form, setForm] = useState<OrderForm>({
-    docId: searchParams.get("doc") || "",
+    docIds: searchParams.get("doc") ? [searchParams.get("doc")!] : [],
     name: "",
     phone: "",
     email: "",
@@ -36,9 +36,28 @@ export default function OrderPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const selectedDoc: DocumentType | undefined = form.docId
-    ? allDocuments.find((d) => d.id === form.docId)
-    : undefined;
+  const selectedDocs: DocumentType[] = form.docIds
+    .map((id) => allDocuments.find((d) => d.id === id))
+    .filter((d): d is DocumentType => d !== undefined);
+
+  const totalFee = selectedDocs.reduce((sum, d) => sum + d.estimatedFee, 0);
+  const allMaterials = [...new Set(selectedDocs.flatMap((d) => d.materials))];
+
+  const toggleDoc = (docId: string) => {
+    setForm((prev) => ({
+      ...prev,
+      docIds: prev.docIds.includes(docId)
+        ? prev.docIds.filter((id) => id !== docId)
+        : [...prev.docIds, docId],
+    }));
+    if (errors.docIds) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next.docIds;
+        return next;
+      });
+    }
+  };
 
   const updateField = (field: keyof OrderForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -63,7 +82,7 @@ export default function OrderPage() {
 
   const validateStep1 = () => {
     const errs: Record<string, string> = {};
-    if (!form.docId) errs.docId = "请选择文件类型";
+    if (form.docIds.length === 0) errs.docIds = "请至少选择一种文件类型";
     if (!form.name.trim()) errs.name = "请输入姓名";
     if (!form.phone.trim()) errs.phone = "请输入手机号";
     if (!form.email.trim()) errs.email = "请输入邮箱";
@@ -93,14 +112,14 @@ export default function OrderPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          docId: form.docId,
-          docName: selectedDoc?.name || "",
+          docIds: form.docIds,
+          docNames: selectedDocs.map((d) => d.name).join("、"),
           name: form.name,
           phone: form.phone,
           email: form.email,
           address: form.address,
           note: form.note,
-          fee: selectedDoc?.estimatedFee || 0,
+          fee: totalFee + (form.shipping === "express-ship" ? 150 : 100),
         }),
       });
 
@@ -230,31 +249,41 @@ export default function OrderPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     认证文件类型 <span className="text-red-500">*</span>
+                    <span className="text-gray-400 font-normal ml-1">（可多选）</span>
                   </label>
-                  <select
-                    value={form.docId}
-                    onChange={(e) => updateField("docId", e.target.value)}
-                    className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-1 ${
-                      errors.docId
-                        ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                        : "border-gray-200 focus:border-primary focus:ring-primary"
-                    }`}
-                  >
-                    <option value="">请选择文件类型</option>
+                  <div className="space-y-2">
                     {allDocuments.map((doc) => (
-                      <option key={doc.id} value={doc.id}>
-                        {doc.name} - ¥{doc.estimatedFee.toLocaleString()}
-                      </option>
+                      <label
+                        key={doc.id}
+                        className={`flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all ${
+                          form.docIds.includes(doc.id)
+                            ? "border-primary bg-primary-light/10"
+                            : "border-gray-200 hover:border-primary/30"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={form.docIds.includes(doc.id)}
+                          onChange={() => toggleDoc(doc.id)}
+                          className="w-4 h-4 text-primary rounded"
+                        />
+                        <div className="flex-1">
+                          <span className="text-sm font-medium text-gray-900">{doc.name}</span>
+                          <span className="text-xs text-gray-400 ml-2">{doc.description}</span>
+                        </div>
+                        <span className="text-sm font-semibold text-primary">¥{doc.estimatedFee}</span>
+                      </label>
                     ))}
-                  </select>
-                  {errors.docId && (
-                    <p className="mt-1 text-xs text-red-500">{errors.docId}</p>
+                  </div>
+                  {errors.docIds && (
+                    <p className="mt-1 text-xs text-red-500">{errors.docIds}</p>
                   )}
-                  {selectedDoc && (
+                  {selectedDocs.length > 0 && (
                     <div className="mt-3 p-4 bg-primary-light rounded-xl">
                       <p className="text-sm text-primary font-medium">
-                        预计费用：¥{selectedDoc.estimatedFee.toLocaleString()} |
-                        办理周期：{selectedDoc.estimatedDays}个工作日
+                        已选 {selectedDocs.length} 项 |
+                        合计费用：¥{totalFee.toLocaleString()} |
+                        办理周期：1周
                       </p>
                     </div>
                   )}
@@ -365,13 +394,13 @@ export default function OrderPage() {
                   上传以下材料的清晰扫描件或照片即可，<strong className="text-green-600">无需邮寄原件</strong>。支持 PDF、JPG、PNG 格式
                 </p>
 
-                {selectedDoc && (
+                {allMaterials.length > 0 && (
                   <div className="bg-gray-50 rounded-xl p-4">
                     <h3 className="text-sm font-medium text-gray-700 mb-2">
                       所需材料清单：
                     </h3>
                     <ul className="space-y-1">
-                      {selectedDoc.materials.map((m, i) => (
+                      {allMaterials.map((m, i) => (
                         <li
                           key={i}
                           className="text-sm text-gray-600 flex items-center gap-2"
@@ -470,7 +499,7 @@ export default function OrderPage() {
                       <p className="text-xs text-gray-400 mb-2">办理时效</p>
                       <div className="grid grid-cols-2 gap-3">
                         {[
-                          { value: "standard", label: "标准办理", desc: `${selectedDoc?.estimatedDays ?? 15}个工作日`, price: 0 },
+                          { value: "standard", label: "标准办理", desc: "1周", price: 0 },
                           { value: "express", label: "加急办理", desc: "5个工作日", price: 800 },
                         ].map((opt) => (
                           <label
@@ -543,7 +572,7 @@ export default function OrderPage() {
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div className="text-gray-500">文件类型</div>
                     <div className="font-medium text-gray-900">
-                      {selectedDoc?.name}
+                      {selectedDocs.map((d) => d.name).join("、")}
                     </div>
                     <div className="text-gray-500">申请人</div>
                     <div className="font-medium text-gray-900">{form.name}</div>
@@ -569,7 +598,7 @@ export default function OrderPage() {
                     <div className="flex justify-between items-center">
                       <span className="text-gray-500 text-sm">认证费用</span>
                       <span className="font-medium text-gray-900">
-                        ¥{selectedDoc?.estimatedFee.toLocaleString() ?? 0}
+                        ¥{totalFee.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
@@ -584,7 +613,7 @@ export default function OrderPage() {
                       <span className="text-gray-700 font-medium">合计</span>
                       <span className="text-2xl font-bold text-primary">
                         ¥{(
-                          (selectedDoc?.estimatedFee ?? 0) +
+                          totalFee +
                           (form.shipping === "express-ship" ? 150 : 100)
                         ).toLocaleString()}
                       </span>
@@ -662,7 +691,7 @@ export default function OrderPage() {
                   disabled={submitting}
                   className="rounded-xl bg-green-600 px-8 py-3 text-sm font-semibold text-white hover:bg-green-700 transition-colors disabled:opacity-50"
                 >
-                  {submitting ? "提交中..." : `确认支付 ¥${((selectedDoc?.estimatedFee ?? 0) + (form.shipping === "express-ship" ? 150 : 100)).toLocaleString()}`}
+                  {submitting ? "提交中..." : `确认支付 ¥${(totalFee + (form.shipping === "express-ship" ? 150 : 100)).toLocaleString()}`}
                 </button>
               </div>
             )}
