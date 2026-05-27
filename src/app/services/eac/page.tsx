@@ -38,6 +38,7 @@ export default function EACPage() {
         </div>
 
         <div className="text-center">
+          <p className="text-sm text-gray-400 mb-4">具体价格请咨询客服</p>
           <Link href="/order" className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
             咨询 EAC 认证
           </Link>

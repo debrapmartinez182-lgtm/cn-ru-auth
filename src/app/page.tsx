@@ -304,10 +304,9 @@ export default function HomePage() {
                 <p className="text-sm text-gray-500 mb-4">
                   喀山联邦大学申请全流程指导，专业选择、材料准备、签证办理一站式服务。
                 </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {["专业规划", "材料指导", "签证协助"].map((tag) => (
-                    <span key={tag} className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">{tag}</span>
-                  ))}
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-lg font-bold text-blue-600">¥5,000</span>
+                  <span className="text-xs text-blue-400">包干一条龙</span>
                 </div>
                 <span className="inline-flex items-center text-primary text-sm font-medium">
                   了解更多
