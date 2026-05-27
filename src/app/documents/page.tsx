@@ -142,7 +142,7 @@ export default function DocumentsPage() {
                       <div>
                         <div className="text-xs text-gray-400">参考费用</div>
                         <div className="text-lg font-bold text-primary">
-                          ¥{doc.estimatedFee.toLocaleString()}
+                          {doc.estimatedFee === 0 ? "咨询客服" : `¥${doc.estimatedFee.toLocaleString()}`}
                         </div>
                       </div>
                       <div className="text-right">
