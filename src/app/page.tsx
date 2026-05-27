@@ -42,6 +42,14 @@ const cases = [
     days: "7",
   },
   {
+    document: "护照翻译认证",
+    image: "/cases/passport-real2.jpg",
+    user: "留学申请 · 丰同学",
+    scenario: "赴俄留学办理签证需要护照翻译及官方认证",
+    result: "护照扫描件上传，1周完成认证，顺利办理签证",
+    days: "7",
+  },
+  {
     document: "成绩单认证",
     image: "/cases/degree-real.jpg",
     user: "硕士申请 · 李同学",

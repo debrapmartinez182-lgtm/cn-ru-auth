@@ -16,7 +16,7 @@ interface CaseItem {
 const allCases: CaseItem[] = [
   // 护照
   { id: 1, document: "护照认证", image: "/cases/passport-real.jpg", user: "留学生 · 李同学", category: "留学", scenario: "赴俄留学签证需要护照翻译及官方认证", result: "上传护照扫描件，12个工作日完成认证，顺利递交签证材料", days: "7" },
-  { id: 2, document: "护照认证", image: "/cases/passport-2.jpg", user: "交换生 · 赵同学", category: "留学", scenario: "参加中俄交换生项目，需要护照认证办理长期签证", result: "手机拍照上传，10个工作日完成，顺利出境", days: "7" },
+  { id: 2, document: "护照翻译认证", image: "/cases/passport-real2.jpg", user: "留学申请 · 丰同学", category: "留学", scenario: "赴俄留学办理签证需要护照翻译及官方认证", result: "护照扫描件上传，1周完成认证，顺利办理签证", days: "7" },
   // 成绩单
   { id: 3, document: "成绩单认证", image: "/cases/degree-real.jpg", user: "硕士申请 · 李同学", category: "留学", scenario: "申请莫斯科大学研究生，需要本科成绩单俄语认证", result: "学校教务系统导出PDF直接上传，15个工作日拿到认证件", days: "7" },
   { id: 4, document: "成绩单认证", image: "/cases/transcript-2.jpg", user: "博士申请 · 黄同学", category: "留学", scenario: "申请圣彼得堡大学博士，需硕士成绩单认证", result: "成绩单扫描件上传，12个工作日通过认证", days: "7" },
