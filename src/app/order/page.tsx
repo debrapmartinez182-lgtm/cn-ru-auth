@@ -501,11 +501,11 @@ export default function OrderPage() {
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-400 mb-2">快递时效</p>
+                      <p className="text-xs text-gray-400 mb-2">快递方式</p>
                       <div className="grid grid-cols-2 gap-3">
                         {[
-                          { value: "standard-ship", label: "标准快递", desc: "3-5天送达", price: 0 },
-                          { value: "express-ship", label: "加急快递", desc: "1-2天送达", price: 100 },
+                          { value: "standard-ship", label: "标准快递", desc: "3-5天送达", price: 100 },
+                          { value: "express-ship", label: "加急快递", desc: "1-2天送达", price: 150 },
                         ].map((opt) => (
                           <label
                             key={opt.value}
@@ -525,7 +525,7 @@ export default function OrderPage() {
                                 className="text-primary"
                               />
                               <span className="text-xs text-gray-500">
-                                {opt.price > 0 ? `+¥${opt.price}` : "免运费"}
+                                ¥{opt.price}
                               </span>
                             </div>
                             <span className="text-sm font-medium text-gray-900 mt-1">{opt.label}</span>
@@ -565,11 +565,30 @@ export default function OrderPage() {
 
                   <hr className="border-gray-200" />
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-500 text-sm">认证费用</span>
-                    <span className="text-2xl font-bold text-primary">
-                      ¥{selectedDoc?.estimatedFee.toLocaleString() ?? 0}
-                    </span>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500 text-sm">认证费用</span>
+                      <span className="font-medium text-gray-900">
+                        ¥{selectedDoc?.estimatedFee.toLocaleString() ?? 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500 text-sm">
+                        快递费（{form.shipping === "express-ship" ? "加急" : "标准"}）
+                      </span>
+                      <span className="font-medium text-gray-900">
+                        ¥{form.shipping === "express-ship" ? 150 : 100}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                      <span className="text-gray-700 font-medium">合计</span>
+                      <span className="text-2xl font-bold text-primary">
+                        ¥{(
+                          (selectedDoc?.estimatedFee ?? 0) +
+                          (form.shipping === "express-ship" ? 150 : 100)
+                        ).toLocaleString()}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -643,7 +662,7 @@ export default function OrderPage() {
                   disabled={submitting}
                   className="rounded-xl bg-green-600 px-8 py-3 text-sm font-semibold text-white hover:bg-green-700 transition-colors disabled:opacity-50"
                 >
-                  {submitting ? "提交中..." : `确认支付 ¥${selectedDoc?.estimatedFee.toLocaleString() ?? 0}`}
+                  {submitting ? "提交中..." : `确认支付 ¥${((selectedDoc?.estimatedFee ?? 0) + (form.shipping === "express-ship" ? 150 : 100)).toLocaleString()}`}
                 </button>
               </div>
             )}
