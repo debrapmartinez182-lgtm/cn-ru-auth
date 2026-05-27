@@ -505,7 +505,7 @@ export default function OrderPage() {
                       <div className="grid grid-cols-2 gap-3">
                         {[
                           { value: "standard-ship", label: "标准快递", desc: "3-5天送达", price: 0 },
-                          { value: "express-ship", label: "加急快递", desc: "1-2天送达", price: 300 },
+                          { value: "express-ship", label: "加急快递", desc: "1-2天送达", price: 100 },
                         ].map((opt) => (
                           <label
                             key={opt.value}
